@@ -51,6 +51,8 @@ class DraftableBehavior extends ModelBehavior {
 		'modelAlias' => null, // changed to $Model->alias in setup()
 		'foreignKeyName' => null,
 		'reviseDateField' => 'revise_to_date',
+		'conditions' => null,
+		'returnVersion' => null,
 		);
 
 
@@ -229,7 +231,7 @@ class DraftableBehavior extends ModelBehavior {
 	
 	
 /**
- * Save live method
+ * live data method
  * 
  * Since we saved a draft, we sometimes need to resave the existing record so that beforeSave will still return true.
  *
@@ -250,13 +252,81 @@ class DraftableBehavior extends ModelBehavior {
 /**
  * After find method.
  *
+ * Replace found data with draft data if draft is a named parameter
+ *
  * @param object $Model model object
  * @param mixed $id String or integer model ID
  * @access public
  * @return boolean
  */
-	public function afterFind($Model, $id) {
-		
+	public function afterFind($Model, $results, $primary) {
+		if (!empty($this->settings['returnVersion'])) {
+			$i=0;
+			foreach ($results as $result) {
+				if (!empty($this->settings['conditions'])) {
+					foreach ($this->settings['conditions'] as $key => $value) {
+						if ($result[$this->modelName][$key] == $value) {
+							// then filter the limited set (used if multiple finds from the same model are on a single page)
+							$results[$i] = Set::merge($result, $this->getDraft($Model, $this->modelName, $result[$this->modelName][$this->foreignKey], $this->settings['returnVersion']));
+						} 
+					}
+				} else {
+					// by default filter all
+					$results[$i] = Set::merge($result, $this->getDraft($Model, $this->modelName, $result[$this->modelName][$this->foreignKey], $this->settings['returnVersion']));
+				}
+				$i++;
+			}
+		}
+		return $results;			
+	}
+	
+/**
+ * Draft data method
+ * 
+ * Get the data of a draft
+ *
+ * @param string
+ * @param string
+ * @param int
+ * @access public
+ * @return array
+ */
+	public function getDraft($Model, $modelName, $foreignKey, $recency = 1) {
+		$Model->bindModel(array('hasMany' => array(
+			'Draft' => array(
+				'className' => 'Drafts.Draft',
+				'foreignKey' => $this->foreignKey,
+				'conditions' => array('Draft.model' => $this->modelName),
+				'fields' => '',
+				'dependent' => true,
+			))), false);
+		if ($recency > 1) {
+			$versions = $Model->Draft->find('all', array(
+				'conditions' => array(
+					'Draft.model' => $modelName, 
+					'Draft.foreign_key' => $foreignKey,
+					),
+				'order' => array(
+					'Draft.created' => 'DESC',
+					),
+				));
+			if (!empty($versions[$recency - 1])) {
+				$revision = $versions[$recency - 1];
+			} else {
+				$revision = end($versions);
+			}			
+		} else {
+			$revision = $Model->Draft->find('first', array(
+				'conditions' => array(
+					'Draft.model' => $modelName, 
+					'Draft.foreign_key' => $foreignKey,
+					),
+				'order' => array(
+					'Draft.created' => 'DESC',
+					),
+				));
+		}
+		return unserialize($revision['Draft']['value']);
 	}
 	
 }

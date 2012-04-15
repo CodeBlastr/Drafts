@@ -68,6 +68,40 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 		$this->assertTrue(is_a($this->Model->Behaviors->Draftable, 'DraftableBehavior'));
 	}
 	
+/**
+ * Test finding records and updating results
+ */ 
+	public function testFinding() {		
+		$result = $this->Model->find('first', array('conditions' => array('Article.id' => '4f889729-c2fc-4c8a-ba36-1a14124e0d46'))); // has revisions but we're not asking for revisions
+		$this->assertEqual('Three Revision Article', trim($result['Article']['title']));
+		
+		$this->Model->Behaviors->attach('Drafts.Draftable', array('returnVersion' => 1)); // now we start asking for revisions
+		
+		$result = $this->Model->find('first', array('conditions' => array('Article.id' => '4f668729-c2fc-4c8a-ba36-1a14124e0d46'))); // no revisions
+		$this->assertEqual('Zero Revision Article', trim($result['Article']['title']));
+		
+		
+		$result = $this->Model->find('first', array('conditions' => array('Article.id' => '4f88970e-b438-4b01-8740-1a14124e0d46'))); // one revision
+		$this->assertEqual('Older Version of One Revision Article', trim($result['Article']['title']));
+		
+				
+		$result = $this->Model->find('first', array('conditions' => array('Article.id' => '4f889729-c2fc-4c8a-ba36-1a14124e0d46'))); // multiple revisions get the earliest
+		$this->assertEqual('Older Version of Second Article', trim($result['Article']['title']));
+		
+		$this->Model->Behaviors->attach('Drafts.Draftable', array('returnVersion' => 2)); // now we start asking for older revisions
+		$result = $this->Model->find('first', array('conditions' => array('Article.id' => '4f889729-c2fc-4c8a-ba36-1a14124e0d46'))); // multiple revisions and we want the 2nd one of 3
+		$this->assertEqual('Older Older Version of Second Article', trim($result['Article']['title']));
+		
+		$this->Model->Behaviors->attach('Drafts.Draftable', array('returnVersion' => 3)); // now we start asking for older revisions
+		$result = $this->Model->find('first', array('conditions' => array('Article.id' => '4f889729-c2fc-4c8a-ba36-1a14124e0d46'))); // multiple revisions and we want the 3rd one of 3
+		$this->assertEqual('Oldest Version of Second Article', trim($result['Article']['title']));
+		
+		$this->Model->Behaviors->attach('Drafts.Draftable', array('returnVersion' => 5)); // now we start asking for older revisions
+		$result = $this->Model->find('first', array('conditions' => array('Article.id' => '4f889729-c2fc-4c8a-ba36-1a14124e0d46'))); // asking for an older version than there is, so it should return the oldest
+		$this->assertEqual('Oldest Version of Second Article', trim($result['Article']['title']));
+		
+	}
+	
 	
 /**
  * Test this behaviors interception of saving related models
@@ -104,8 +138,8 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 			);
 		$data['Article']['rename_draft'] = 1; // save a draft, with a non default draft field name
 		$result = $this->Model->save($data);
-		$this->assertEqual('First Article', $result['Article']['title']); // test that the title is equal to the fixture data that has the same id as the sent data, meaning that the record was not updated to new value, and instead was kept the same while the incoming data was sent to the drafts table
-		$draft = $this->Draft->find('first', array('conditions' => array('Draft.model' => 'Article', 'Draft.foreign_key' => '4f88970e-b438-4b01-8740-1a14124e0d46'), 'order' => 'Draft.created'));
+		$this->assertEqual('One Revision Article', $result['Article']['title']); // test that the title is equal to the fixture data that has the same id as the sent data, meaning that the record was not updated to new value, and instead was kept the same while the incoming data was sent to the drafts table
+		$draft = $this->Draft->find('first', array('conditions' => array('Draft.model' => 'Article', 'Draft.foreign_key' => '4f88970e-b438-4b01-8740-1a14124e0d46'), 'order' => 'Draft.created DESC'));
 		$value = unserialize($draft['Draft']['value']);
 		$this->assertEqual($data['Article']['title'], $value['Article']['title']); // test that there is a draft with the new values
 		unset($result);
