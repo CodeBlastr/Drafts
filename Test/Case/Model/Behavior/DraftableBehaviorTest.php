@@ -72,7 +72,7 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 /**
  * Test this behaviors interception of saving related models
  */
-	public function testSaving() {
+	public function testNewArticleSaves() {
 		// test normal article save without a triggerField set
 		$data['Article'] = array(
 			'title' => 'Test Name',
@@ -85,8 +85,16 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 		
 		$data['Article']['rename_draft'] = 1; // save a draft, with a non default draft field name
 		$result = $this->Model->save($data);
+		
 		$this->assertTrue(empty($result['Article']['id'])); // test that the save didn't go through, becasue draft was set
 		unset($result);
+	}
+	
+	
+/**
+ * Test this behaviors interception of saving related models
+ */
+	public function testExistingArticleSaves() {
 		
 		
 		$data['Article'] = array(
@@ -97,6 +105,9 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 		$data['Article']['rename_draft'] = 1; // save a draft, with a non default draft field name
 		$result = $this->Model->save($data);
 		$this->assertEqual('First Article', $result['Article']['title']); // test that the title is equal to the fixture data that has the same id as the sent data, meaning that the record was not updated to new value, and instead was kept the same while the incoming data was sent to the drafts table
+		$draft = $this->Draft->find('first', array('conditions' => array('Draft.model' => 'Article', 'Draft.foreign_key' => '4f88970e-b438-4b01-8740-1a14124e0d46'), 'order' => 'Draft.created'));
+		$value = unserialize($draft['Draft']['value']);
+		$this->assertEqual($data['Article']['title'], $value['Article']['title']); // test that there is a draft with the new values
 		unset($result);
 	}
 	

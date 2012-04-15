@@ -87,13 +87,13 @@ class DraftableBehavior extends ModelBehavior {
 				$Model->data = $this->saveRevision($Model, $this->modelName, $Model->data[$this->modelName][$this->foreignKey], $Model->data[$this->modelName][$this->settings['reviseDateField']], true); 
 				return true;
 			} else {
-				// save to the drafts table and empty the Model data so that it does not save
+				// save to the drafts table and replace the Model data so that it does not save
 				if (!empty($Model->data[$this->modelName][$this->foreignKey])) {
 					// ex. array('Article => array('id' => '911923-1-810291-2-1'))
 					// this is coming from an edit save so we can just intercept here
 					try {
 						$this->saveDraft($Model);
-						$Model->data = $this->_liveData($Model); 
+						$Model->data = $this->_liveData($Model);
 						unset($Model->data[$this->modelName][$this->settings['triggerField']]);
 						return true;
 					} catch (Exception $e) {
@@ -120,7 +120,7 @@ class DraftableBehavior extends ModelBehavior {
  * @return boolean
  */
 	public function afterSave($Model, $created) {
-		if (!empty($Model->data[$this->modelName][$this->foreignKey])) { // now 'id' exists in afterSave
+		if (!empty($Model->data[$this->modelName][$this->settings['triggerField']]) && !empty($Model->data[$this->modelName][$this->foreignKey])) { // now 'id' exists in afterSave
 			try {
 				$this->saveDraft($Model);
 			} catch (Exception $e) {
@@ -175,9 +175,9 @@ class DraftableBehavior extends ModelBehavior {
 						'fields' => '',
 						'dependent' => true,
 					))), false);
-				$draft['model'] = $this->modelName;
-				$draft['foreign_key'] = $Model->data[$this->modelName][$this->foreignKey];
-				$draft['value'] = serialize($Model->data);
+				$draft['Draft']['model'] = $this->modelName;
+				$draft['Draft']['foreign_key'] = $Model->data[$this->modelName][$this->foreignKey];
+				$draft['Draft']['value'] = serialize($Model->data);
 				return $Model->Draft->save($draft);
 			} catch (Exception $e) {
 				debug($e->getMessage());
