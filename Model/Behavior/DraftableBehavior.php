@@ -86,7 +86,7 @@ class DraftableBehavior extends ModelBehavior {
 		if (!empty($Model->data[$this->modelName][$this->settings['triggerField']])) {
 			if ($Model->data[$this->modelName][$this->settings['triggerField']] == 'revise') {
 				// update data to an older version as opposed to saving a draft
-				$Model->data = $this->saveRevision($Model, $this->modelName, $Model->data[$this->modelName][$this->foreignKey], $Model->data[$this->modelName][$this->settings['reviseDateField']], true); 
+				$Model->data = $this->saveRevision($Model, $this->modelName, $Model->data[$this->modelName][$this->foreignKey], $Model->data[$this->modelName][$this->settings['reviseDateField']], 'manual', true); 
 				return true;
 			} else {
 				// save to the drafts table and replace the Model data so that it does not save
@@ -201,10 +201,7 @@ class DraftableBehavior extends ModelBehavior {
  * @access public
  * @return boolean
  */
-	public function saveRevision($Model, $modelName = null, $foreignKey = null, $date = null, $returnOnly = false) {
-		$modelName = !empty($modelName) ? $modelName : $this->modelName;
-		$foreignKey = !empty($foreignKey) ? $foreignKey : $Model->data[$this->modelName][$this->foreignKey];
-		$date = !empty($date) ? $date : $Model->data[$this->modelName][$this->settings['reviseDateField']];
+	public function saveRevision($Model, $modelName = null, $foreignKey = null, $date = null, $type = 'manual', $returnOnly = false) {
 		
 		$Model->bindModel(array('hasMany' => array(
 			'Draft' => array(
@@ -219,6 +216,7 @@ class DraftableBehavior extends ModelBehavior {
 				'Draft.model' => $modelName, 
 				'Draft.foreign_key' => $foreignKey,
 				'Draft.created' => $date,
+				'Draft.type' => $type,
 				),
 			));		
 		
