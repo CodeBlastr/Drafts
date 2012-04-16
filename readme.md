@@ -14,11 +14,14 @@ Mainly a behavior that adds the ability to easily save draft versions of a recor
 1. In the model you want to use drafts with, attach the Drafts.Draftable Behavior
 2. The default settings should do most of the work, but if you need something custom change the settings during behavior attachment.
 3. When you save a record add a field called 'draft' and set it to 1.  For example...
+```php
 		echo $this->Form->input('Article.draft', array('value' => 1))
+```
 4. Click save and instead of editing the article it will save a draft which you can then preview by going to the view and 
 
 ## View Usage ##
 1. In your controller add a beforeFilter method, similar to this...
+```php
 		public function beforeFilter() {
 			parent::beforeFilter();
 			if (!empty($this->request->params['named']['draft'])) { 
@@ -26,6 +29,7 @@ Mainly a behavior that adds the ability to easily save draft versions of a recor
 				}
 			}
 		}
+```
 2. Visit a url similar to http://example.com/articles/articles/view/3/draft:1
 3. It will return the results of the newest draft instead of the actual live version
 4. Visit a url similar to http://example/articles/articles/view/3/draft:4
