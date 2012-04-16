@@ -33,7 +33,7 @@ class DraftTestCase extends CakeTestCase {
  */
 	public function testDraft() {
 		$result = $this->Draft->find('first');
-		$this->assertEqual('4f888b63-037c-405c-bd16-211000000000', $result['Draft']['id']); // test that the drafts table exists
+		$this->assertEqual('4f899b63-037c-405c-bd16-211000000000', $result['Draft']['id']); // test that the drafts table exists
 	}
 
 /**
