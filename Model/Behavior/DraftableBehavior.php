@@ -168,22 +168,46 @@ class DraftableBehavior extends ModelBehavior {
  */
 	public function saveDraft($Model) {
 		if (!empty($Model->data[$this->modelName][$this->foreignKey])) {
-			try {
-				$Model->bindModel(array('hasMany' => array(
-					'Draft' => array(
-						'className' => 'Drafts.Draft',
-						'foreignKey' => $this->foreignKey,
-						'conditions' => array('Draft.model' => $this->modelName),
-						'fields' => '',
-						'dependent' => true,
-					))), false);
-				$draft['Draft']['model'] = $this->modelName;
-				$draft['Draft']['foreign_key'] = $Model->data[$this->modelName][$this->foreignKey];
-				$draft['Draft']['value'] = serialize($Model->data);
-				return $Model->Draft->save($draft);
-			} catch (Exception $e) {
-				debug($e->getMessage());
-				break;
+			$Model->bindModel(array('hasMany' => array(
+				'Draft' => array(
+					'className' => 'Drafts.Draft',
+					'foreignKey' => $this->foreignKey,
+					'conditions' => array('Draft.model' => $this->modelName),
+					'fields' => '',
+					'dependent' => true,
+				))), false);
+			$draft['Draft']['model'] = $this->modelName;
+			$draft['Draft']['foreign_key'] = $Model->data[$this->modelName][$this->foreignKey];
+			$draft['Draft']['value'] = serialize($Model->data);
+			
+			$latest = $Model->Draft->find('first', array(
+				'conditions' => array(
+					'Draft.model' => $this->modelName, 
+					'Draft.foreign_key' => $Model->data[$this->modelName][$this->foreignKey],
+					),
+				'order' => array(
+					'Draft.created' => 'DESC',
+					),
+				));
+			$compareData1 = $Model->data;
+			unset($compareData1[$this->modelName]['created']);
+			unset($compareData1[$this->modelName]['modified']);
+			unset($compareData1[$this->modelName][$this->settings['triggerField']]);
+			$compareData2 = unserialize($latest['Draft']['value']);
+			unset($compareData2[$this->modelName]['created']);
+			unset($compareData2[$this->modelName]['modified']);
+			unset($compareData2[$this->modelName][$this->settings['triggerField']]);
+						
+			if (serialize($compareData1) == serialize($compareData2)) {
+				# data is the same don't save
+				return false;
+			} else {
+				try {
+					return $Model->Draft->save($draft);
+				} catch (Exception $e) {
+					debug($e->getMessage());
+					break;
+				}
 			}
 		} else {
 			throw new Exception(__('foreignKeyName is required (normally id)'));

@@ -69,8 +69,8 @@ class DraftFixture extends CakeTestFixture {
 			'type' => 'manual',
 			'creator_id' => '1',
 			'modifier_id' => '1',
-			'created' => '2012-04-01 20:24:03',
-			'modified' => '2012-04-01 20:24:03'
+			'created' => '2012-03-01 20:24:03',
+			'modified' => '2012-03-01 20:24:03'
 		),
 		array(
 			'id' => '4f877b63-037c-405c-bd16-211000000000',
@@ -80,8 +80,8 @@ class DraftFixture extends CakeTestFixture {
 			'type' => 'manual',
 			'creator_id' => '1',
 			'modifier_id' => '1',
-			'created' => '2012-03-01 20:24:03',
-			'modified' => '2012-03-01 20:24:03'
+			'created' => '2012-02-01 20:24:03',
+			'modified' => '2012-02-01 20:24:03'
 		),
 	);
 }

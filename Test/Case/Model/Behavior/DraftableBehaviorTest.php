@@ -71,7 +71,7 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 /**
  * Test finding records and updating results
  */ 
-	public function testFinding() {		
+	public function testFinding() {	
 		$result = $this->Model->find('first', array('conditions' => array('Article.id' => '4f889729-c2fc-4c8a-ba36-1a14124e0d46'))); // has revisions but we're not asking for revisions
 		$this->assertEqual('Three Revision Article', trim($result['Article']['title']));
 		
@@ -107,12 +107,41 @@ class DraftableBehaviorTestCase extends CakeTestCase {
  * Test this behaviors interception of saving related models
  */
 	public function testNewArticleSaves() {
+		
+		$startCount = $this->Draft->find('count');
+		$data['Article'] = array(
+			'id' => '4f889729-c2fc-4c8a-ba36-1a14124e0d46',
+			'title' => 'Older Version of Second Article',
+			'content' => 'Lorem ipsum dolor sit amet, aliquet feugiat. Convallis morbi fringilla gravida, phasellus feugiat dapibus velit nunc, pulvinar eget sollicitudin venenatis cum nullam, vivamus ut a sed, mollitia lectus. Nulla vestibulum massa neque ut et, id hendrerit sit, feugiat in taciti enim proin nibh, tempor dignissim, rhoncus duis vestibulum nunc mattis convallis.',
+			'rename_draft' => 1, // save that draft that matches the latest draft to make sure nothing is saved
+			); 
+		$this->Model->create();
+		$result = $this->Model->save($data);
+		$midCount = $this->Draft->find('count');
+		$this->assertEqual($startCount, $midCount); // shouldn't save because it matched the latest draft
+		
+		
+		$data['Article'] = array(
+			'id' => '4f889729-c2fc-4c8a-ba36-1a14124e0d46',
+			'title' => 'Newer Version of Second Article',
+			'content' => 'Lorem ipsum dolor sit amet, aliquet feugiat. Convallis morbi fringilla gravida, phasellus feugiat dapibus velit nunc, pulvinar eget sollicitudin venenatis cum nullam, vivamus ut a sed, mollitia lectus. Nulla vestibulum massa neque ut et, id hendrerit sit, feugiat in taciti enim proin nibh, tempor dignissim, rhoncus duis vestibulum nunc mattis convallis.',
+			'rename_draft' => 1, // save that draft that matches the latest draft to make sure nothing is saved
+			); 
+		$this->Model->create();
+		$result = $this->Model->save($data);
+		$endCount = $this->Draft->find('count');		
+		$this->assertNotEqual($midCount, $endCount); // should be up one tick from start and mid, because we changed the title
+		unset($result);
+		unset($data);
+		
+		
 		// test normal article save without a triggerField set
 		$data['Article'] = array(
 			'title' => 'Test Name',
 			'content' => 'Lorem ipsum dolor sit amet, aliquet feugiat. Convallis morbi fringilla gravida, phasellus feugiat dapibus velit nunc, pulvinar eget sollicitudin venenatis cum nullam, vivamus ut a sed, mollitia lectus. Nulla vestibulum massa neque ut et, id hendrerit sit, feugiat in taciti enim proin nibh, tempor dignissim, rhoncus duis vestibulum nunc mattis convallis.',
 			);
-		$result = $this->Model->save($data);		
+		$this->Model->create();
+		$result = $this->Model->save($data);
 		$this->assertTrue(!empty($result['Article']['id'])); // should be the same array as $data but with an id value
 		unset($result);
 		
@@ -135,8 +164,8 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 			'id' => '4f88970e-b438-4b01-8740-1a14124e0d46',
 			'title' => 'New Test Name',
 			'content' => 'Lorem ipsum dolor sit amet, aliquet feugiat. Convallis morbi fringilla gravida, phasellus feugiat dapibus velit nunc, pulvinar eget sollicitudin venenatis cum nullam, vivamus ut a sed, mollitia lectus. Nulla vestibulum massa neque ut et, id hendrerit sit, feugiat in taciti enim proin nibh, tempor dignissim, rhoncus duis vestibulum nunc mattis convallis.',
-			);
-		$data['Article']['rename_draft'] = 1; // save a draft, with a non default draft field name
+			'rename_draft' => 1, // save a draft, with a non default draft field name
+			); 
 		$result = $this->Model->save($data);
 		$this->assertEqual('One Revision Article', $result['Article']['title']); // test that the title is equal to the fixture data that has the same id as the sent data, meaning that the record was not updated to new value, and instead was kept the same while the incoming data was sent to the drafts table
 		$draft = $this->Draft->find('first', array('conditions' => array('Draft.model' => 'Article', 'Draft.foreign_key' => '4f88970e-b438-4b01-8740-1a14124e0d46'), 'order' => 'Draft.created DESC'));
