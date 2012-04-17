@@ -6,7 +6,7 @@ App::uses('Draft', 'Drafts.Model');
  * Draft Test Case
  *
  */
-class DraftTestCase extends CakeTestCase {
+class DraftModelTestCase extends CakeTestCase {
 /**
  * Fixtures
  *
