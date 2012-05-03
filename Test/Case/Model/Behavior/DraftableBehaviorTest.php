@@ -4,7 +4,7 @@ App::uses('DraftableBehavior', 'Drafts.Model/Behavior');
 
 
 if (!class_exists('Article')) {
-	class Article extends CakeTestModel {
+	class DraftArticle extends CakeTestModel {
 	/**
 	 *
 	 */
@@ -20,12 +20,16 @@ if (!class_exists('Article')) {
 	/**
 	 *
 	 */
-		public $useTable = 'articles';
+		public $useTable = 'draft_articles';
 
 	/**
 	 *
 	 */
 		public $name = 'Article';
+	/**
+	 *
+	 */
+		public $alias = 'Article';
 	}
 }
 
@@ -42,7 +46,7 @@ class DraftableBehaviorTestCase extends CakeTestCase {
  */
 	public $fixtures = array(
 		'plugin.Drafts.draft',
-		'plugin.Drafts.article',
+		'plugin.Drafts.draft_article',
 		);
 
 /**
@@ -54,7 +58,7 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 		parent::setUp();
 
 		$this->Draftable = new DraftableBehavior();
-		$this->Model = Classregistry::init('Article');
+		$this->Model = Classregistry::init('DraftArticle');
 		$this->Draft = Classregistry::init('Drafts.Draft');
 	}
 	
@@ -96,7 +100,7 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 		$result = $this->Model->find('first', array('conditions' => array('Article.id' => '4f889729-c2fc-4c8a-ba36-1a14124e0d46'))); // multiple revisions and we want the 3rd one of 3
 		$this->assertEqual('Oldest Version of Second Article', trim($result['Article']['title']));
 		
-		$this->Model->Behaviors->attach('Drafts.Draftable', array('returnVersion' => 5)); // now we start asking for older revisions
+		$this->Model->Behaviors->attach('Drafts.Draftable', array('returnVersion' => 5)); // now we start asking for older revisions that don't exist (shoult return the oldest version)
 		$result = $this->Model->find('first', array('conditions' => array('Article.id' => '4f889729-c2fc-4c8a-ba36-1a14124e0d46'))); // asking for an older version than there is, so it should return the oldest
 		$this->assertEqual('Oldest Version of Second Article', trim($result['Article']['title']));
 		
