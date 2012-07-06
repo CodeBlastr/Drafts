@@ -110,8 +110,7 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 /**
  * Test this behaviors interception of saving related models
  */
-	public function testNewArticleSaves() {
-		
+	public function testNewArticleSaves() {		
 		$startCount = $this->Draft->find('count');
 		$data['Article'] = array(
 			'id' => '4f889729-c2fc-4c8a-ba36-1a14124e0d46',
