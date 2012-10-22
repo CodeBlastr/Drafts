@@ -194,9 +194,9 @@ class DraftableBehavior extends ModelBehavior {
 			unset($compareData1[$this->modelName]['modified']);
 			unset($compareData1[$this->modelName][$this->settings['triggerField']]);
 			$compareData2 = unserialize($latest['Draft']['value']);
-			unset($compareData2[$this->modelName]['created']);
-			unset($compareData2[$this->modelName]['modified']);
-			unset($compareData2[$this->modelName][$this->settings['triggerField']]);
+			if (!empty($compareData2[$this->modelName]['created'])) { unset($compareData2[$this->modelName]['created']); }
+			if (!empty($compareData2[$this->modelName]['modified'])) { unset($compareData2[$this->modelName]['modified']); }
+			if (!empty($compareData2[$this->modelName][$this->settings['triggerField']])) { unset($compareData2[$this->modelName][$this->settings['triggerField']]); }
 						
 			if (serialize($compareData1) == serialize($compareData2)) {
 				# data is the same don't save
