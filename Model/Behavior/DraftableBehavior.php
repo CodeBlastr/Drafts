@@ -199,7 +199,7 @@ class DraftableBehavior extends ModelBehavior {
 			if (!empty($compareData2[$this->modelName][$this->settings['triggerField']])) { unset($compareData2[$this->modelName][$this->settings['triggerField']]); }
 						
 			if (serialize($compareData1) == serialize($compareData2)) {
-				# data is the same don't save
+				// data is the same don't save
 				return false;
 			} else {
 				try {

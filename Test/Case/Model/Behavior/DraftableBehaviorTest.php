@@ -45,8 +45,9 @@ class DraftableBehaviorTestCase extends CakeTestCase {
  * @var array
  */
 	public $fixtures = array(
-		'plugin.Drafts.draft',
-		'plugin.Drafts.draft_article',
+		'app.Condition',
+		'plugin.Drafts.Draft',
+		'plugin.Drafts.DraftArticle',
 		);
 
 /**
@@ -208,6 +209,7 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 	public function tearDown() {
 		unset($this->Draftable);
 		unset($this->Model);
+		unset($this->Draft);
 		ClassRegistry::flush();
 
 		parent::tearDown();
