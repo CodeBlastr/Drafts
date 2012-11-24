@@ -26,6 +26,17 @@ class DraftModelTestCase extends CakeTestCase {
 
 		$this->Draft = ClassRegistry::init('Draft');
 	}
+
+/**
+ * tearDown method
+ *
+ * @return void
+ */
+    public function tearDown() {
+		unset($this->Draft);
+
+		parent::tearDown();
+	}
 	
 	
 /**
@@ -34,17 +45,6 @@ class DraftModelTestCase extends CakeTestCase {
 	public function testDraft() {
 		$result = $this->Draft->find('first');
 		$this->assertEqual('4f899b63-037c-405c-bd16-211000000000', $result['Draft']['id']); // test that the drafts table exists
-	}
-
-/**
- * tearDown method
- *
- * @return void
- */
-	public function tearDown() {
-		unset($this->Draft);
-
-		parent::tearDown();
 	}
 
 }

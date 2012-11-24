@@ -62,6 +62,20 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 		$this->Model = Classregistry::init('DraftArticle');
 		$this->Draft = Classregistry::init('Drafts.Draft');
 	}
+
+/**
+ * tearDown method
+ *
+ * @return void
+ */
+    public function tearDown() {
+		unset($this->Draftable);
+		unset($this->Model);
+		unset($this->Draft);
+		ClassRegistry::flush();
+
+		parent::tearDown();
+	}
 	
 
 /**
@@ -199,20 +213,6 @@ class DraftableBehaviorTestCase extends CakeTestCase {
 		$delete = $this->Model->delete('4f889729-c2fc-4c8a-ba36-1a14124e0d46');
 		$result = $this->Draft->find('all', array('conditions' => array('Draft.model' => 'Article', 'Draft.foreign_key' => '4f889729-c2fc-4c8a-ba36-1a14124e0d46')));		
 		$this->assertTrue(empty($result[0])); // test that all drafts with that id are gone
-	}
-
-/**
- * tearDown method
- *
- * @return void
- */
-	public function tearDown() {
-		unset($this->Draftable);
-		unset($this->Model);
-		unset($this->Draft);
-		ClassRegistry::flush();
-
-		parent::tearDown();
 	}
 
 }

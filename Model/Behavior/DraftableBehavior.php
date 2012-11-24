@@ -139,20 +139,20 @@ class DraftableBehavior extends ModelBehavior {
  * Delete all of the drafts if a record is deleted
  */
  	public function afterDelete($Model) {
-			try {
-				$Model->bindModel(array('hasMany' => array(
-					'Draft' => array(
-						'className' => 'Drafts.Draft',
-						'foreignKey' => $this->foreignKey,
-						'conditions' => array('Draft.model' => $this->modelName),
-						'fields' => '',
-						'dependent' => true,
-					))), false);
-				return $Model->Draft->deleteAll(array('Draft.model' => $this->modelName, 'Draft.foreign_key' => $Model->id));
-			} catch (Exception $e) {
-				debug($e->getMessage());
-				break;
-			}
+		try {
+			$Model->bindModel(array('hasMany' => array(
+				'Draft' => array(
+					'className' => 'Drafts.Draft',
+					'foreignKey' => $this->foreignKey,
+					'conditions' => array('Draft.model' => $this->modelName),
+					'fields' => '',
+					'dependent' => true,
+				))), false);
+			return $Model->Draft->deleteAll(array('Draft.model' => $this->modelName, 'Draft.foreign_key' => $Model->id));
+		} catch (Exception $e) {
+			debug($e->getMessage());
+			break;
+		}
 	}
 	
 	
@@ -226,7 +226,6 @@ class DraftableBehavior extends ModelBehavior {
  * @return boolean
  */
 	public function saveRevision($Model, $modelName = null, $foreignKey = null, $date = null, $type = 'manual', $returnOnly = false) {
-		
 		$Model->bindModel(array('hasMany' => array(
 			'Draft' => array(
 				'className' => 'Drafts.Draft',
@@ -242,8 +241,7 @@ class DraftableBehavior extends ModelBehavior {
 				'Draft.created' => $date,
 				'Draft.type' => $type,
 				),
-			));		
-		
+			));
 		if (!empty($returnOnly)) {
 			return Set::merge($Model->data, unserialize($revision['Draft']['value']));
 		} else {
