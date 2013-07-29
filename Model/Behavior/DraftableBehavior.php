@@ -11,7 +11,7 @@ App::uses('ModelBehavior', 'Model');
  *
  * @filesource
  * @author			Richard Kersey
- * @copyright       RazorIT LLC
+ * @copyright       Buildrr LLC
  * @license			http://www.opensource.org/licenses/mit-license.php The MIT License
  * @link            https://github.com/zuha/Drafts-Zuha-Cakephp-Plugin
  */
