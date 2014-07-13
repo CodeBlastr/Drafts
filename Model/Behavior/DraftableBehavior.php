@@ -64,7 +64,7 @@ class DraftableBehavior extends ModelBehavior {
  * @access public
  * @return boolean
  */
-    public function setup($Model, $config = array()) {
+    public function setup(Model $Model, $config = array()) {
     	$this->settings = array_merge($this->defaults, $config);
 		$this->modelName = !empty($this->settings['modelAlias']) ? $this->settings['modelAlias'] : $Model->alias;
 		$this->foreignKey =  !empty($this->settings['foreignKeyName']) ? $this->settings['foreignKeyName'] : $Model->primaryKey;
@@ -82,7 +82,7 @@ class DraftableBehavior extends ModelBehavior {
  * @access public
  * @return boolean
  */
-	public function beforeSave($Model, $id) {
+	public function beforeSave(Model $Model, $options = array()) {
 		if (!empty($Model->data[$this->modelName][$this->settings['triggerField']])) {
 			if ($Model->data[$this->modelName][$this->settings['triggerField']] == 'revise') {
 				// update data to an older version as opposed to saving a draft
@@ -121,7 +121,7 @@ class DraftableBehavior extends ModelBehavior {
  * @access public
  * @return boolean
  */
-	public function afterSave($Model, $created) {
+	public function afterSave(Model $Model, $created, $options = array()) {
 		if (!empty($Model->data[$this->modelName][$this->settings['triggerField']]) && !empty($Model->data[$this->modelName][$this->foreignKey])) { // now 'id' exists in afterSave
 			try {
 				$this->saveDraft($Model);
@@ -138,7 +138,7 @@ class DraftableBehavior extends ModelBehavior {
  * 
  * Delete all of the drafts if a record is deleted
  */
- 	public function afterDelete($Model) {
+ 	public function afterDelete(Model $Model) {
 		try {
 			$Model->bindModel(array('hasMany' => array(
 				'Draft' => array(
@@ -279,7 +279,7 @@ class DraftableBehavior extends ModelBehavior {
  * @access public
  * @return boolean
  */
-	public function afterFind($Model, $results, $primary) {
+	public function afterFind(Model $Model, $results, $primary = false) {
 		if (!empty($this->settings['returnVersion'])) {
 			$i=0;
 			foreach ($results as $result) {
